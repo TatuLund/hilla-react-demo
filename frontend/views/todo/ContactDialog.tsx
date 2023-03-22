@@ -13,6 +13,8 @@ type Props = {
   onAssignContact: (contact: Contact | undefined) => void;
 };
 
+// Show Grid in the dialog to choose a contact.
+// DataProvider is used for paging the Grid with virtual scrolling from ContactEndpoint
 export function ContactDialog({ opened, onAssignContact }: Props): JSX.Element {
   const [assigned, setAssigned] = useState<Contact[]>([]);
   const [filter, setFilter] = useState('');
@@ -30,7 +32,7 @@ export function ContactDialog({ opened, onAssignContact }: Props): JSX.Element {
   );
 
   function assignTodo(value: Contact | undefined) {
-      onAssignContact(value);
+    onAssignContact(value);
   }
 
   return (

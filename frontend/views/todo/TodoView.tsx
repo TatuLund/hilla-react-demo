@@ -21,6 +21,9 @@ export default function TodoView(): JSX.Element {
   const [todos, setTodos] = useState(Array<Todo>());
   const presets = ['Make food', 'Clean the house', 'Do the groceries', 'Mow the lawn', 'Walk the dog'];
 
+  // Attempt saving of the new Todo item to backend,
+  // if there are validation errors, backend will throw and exception
+  // Catch the exception and parse the errors and populate formik errors accordingly
   const formik = useFormik({
     initialValues: empty,
     onSubmit: async (value: Todo, { setSubmitting, setErrors }) => {
@@ -47,6 +50,7 @@ export default function TodoView(): JSX.Element {
     },
   });
 
+  // Fetch Todos from backend when TodoView is rendered the fist time.
   useEffect(() => {
     (async () => {
       setTodos(await TodoEndpoint.findAll());
@@ -55,6 +59,7 @@ export default function TodoView(): JSX.Element {
     return () => {};
   }, []);
 
+  // Update status of the Todo, this function is passed down to TodiItem via TodoGrid
   async function changeStatus(todo: Todo, done: boolean | undefined): Promise<void> {
     const isDone = done ? done : false;
     const newTodo = { ...todo, done: isDone };
@@ -66,6 +71,7 @@ export default function TodoView(): JSX.Element {
     return todos.filter((todo) => todo.done).length == 0;
   }
 
+  // Collect done Todos and request to remove from the database using TodoEndpoint.remove
   async function remove(): Promise<void> {
     const dones = todos.filter((todo) => todo.done);
     await TodoEndpoint.remove(dones);
@@ -83,6 +89,24 @@ export default function TodoView(): JSX.Element {
     }
   }
 
+  function FormButtons() {
+    return (
+      <>
+        <div className="flex">
+          <Button onClick={() => setDialogOpened(!dialogOpened)}>
+            {assigned ? assigned.firstName + ' ' + assigned.lastName : 'Assign'}
+          </Button>
+          <Button className="ml-auto" theme="primary" disabled={formik.isSubmitting} onClick={formik.submitForm}>
+            Add
+          </Button>
+        </div>
+      </>
+    );
+  }
+
+  // Use formik to bind Todo object with the form.
+  // The errorMessage is bound from formik.errors for validation errors.
+  // As this is a complex view, it has been sliced down to sub components
   return (
     <>
       <div className="grid gap-m shadow-s m-m p-s">
@@ -127,14 +151,7 @@ export default function TodoView(): JSX.Element {
           />
         </FormLayout>
         <ContactDialog opened={dialogOpened} onAssignContact={assignTodo}></ContactDialog>
-        <div className="flex">
-          <Button onClick={() => setDialogOpened(!dialogOpened)}>
-            {assigned ? assigned.firstName + ' ' + assigned.lastName : 'Assign'}
-          </Button>
-          <Button className="ml-auto" theme="primary" disabled={formik.isSubmitting} onClick={formik.submitForm}>
-            Add
-          </Button>
-        </div>
+        <FormButtons></FormButtons>
       </div>
       <div className="m-m shadow-s p-s">
         <TodoGrid todos={todos} onChangeStatus={(todo, value) => changeStatus(todo, value)}></TodoGrid>
@@ -145,4 +162,3 @@ export default function TodoView(): JSX.Element {
     </>
   );
 }
-

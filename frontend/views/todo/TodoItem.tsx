@@ -7,6 +7,7 @@ type Props = {
   onChangeStatus: (todo: Todo, value: boolean | undefined) => void;
 };
 
+// TodoItem is used in TodoGrid, this produces one row for TodoGrid
 export function TodoItem({ todo, onChangeStatus }: Props): JSX.Element {
   return (
     <>
@@ -28,6 +29,7 @@ type BadgeProps = {
   text: string | undefined;
 };
 
+// Lumo contains styles for Badge, this is simple component for Badge
 export function Badge(props: BadgeProps): JSX.Element {
   return (
     <span id={props.id} className={props.className} {...{ theme: 'badge' }}>
