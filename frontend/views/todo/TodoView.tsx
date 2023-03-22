@@ -114,6 +114,7 @@ export default function TodoView(): JSX.Element {
           <ComboBox
             label="Task"
             name="task"
+            allowCustomValue
             items={presets}
             value={formik.values.task}
             onChange={formik.handleChange}
