@@ -77,6 +77,7 @@ export default function TodoView(): JSX.Element {
     if (value) {
       formik.values.assigned = value;
       setAssigned(value);
+      setDialogOpened(false);
     }
   }
 
