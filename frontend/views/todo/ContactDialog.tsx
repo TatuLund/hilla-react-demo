@@ -17,6 +17,8 @@ export function ContactDialog({ opened, onAssignContact }: Props): JSX.Element {
   const [assigned, setAssigned] = useState<Contact[]>([]);
   const [filter, setFilter] = useState('');
 
+  // if the filter changes, useMemo will re-run the callback and return the new dataProvider,
+  // otherwise the previous cached value will be used.
   const dataProvider = useMemo(
     () => async (params: GridDataProviderParams<Contact>, callback: GridDataProviderCallback<Contact>) => {
       const page = await ContactEndpoint.getPage(params.page, params.pageSize, filter);
@@ -27,10 +29,8 @@ export function ContactDialog({ opened, onAssignContact }: Props): JSX.Element {
     [filter]
   );
 
-  function assignTodo(value: Contact | null | undefined) {
-    if (value) {
+  function assignTodo(value: Contact | undefined) {
       onAssignContact(value);
-    }
   }
 
   return (
@@ -38,6 +38,7 @@ export function ContactDialog({ opened, onAssignContact }: Props): JSX.Element {
       <Dialog
         opened={opened}
         header={<h3 className="m-0">Assign Todo</h3>}
+        onOpenedChanged={({ detail: { value } }) => setFilter('')}
         footer={
           <div className="flex gap-m w-full">
             <TextField
@@ -46,6 +47,9 @@ export function ContactDialog({ opened, onAssignContact }: Props): JSX.Element {
               value={filter}
               onValueChanged={({ detail: { value } }) => setFilter(value)}
             ></TextField>
+            <Button theme="secondary" onClick={() => assignTodo(undefined)}>
+              Cancel
+            </Button>
             <Button theme="primary" disabled={assigned.length == 0} onClick={() => assignTodo(assigned[0])}>
               Assign
             </Button>

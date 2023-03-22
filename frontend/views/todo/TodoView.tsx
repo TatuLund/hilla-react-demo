@@ -73,10 +73,12 @@ export default function TodoView(): JSX.Element {
     setTodos(notDone);
   }
 
-  function assignTodo(value: Contact | null | undefined) {
+  function assignTodo(value: Contact | undefined) {
     if (value) {
       formik.values.assigned = value;
       setAssigned(value);
+      setDialogOpened(false);
+    } else {
       setDialogOpened(false);
     }
   }
