@@ -2,8 +2,8 @@ import type Todo from 'Frontend/generated/com/example/application/Todo';
 import type Contact from 'Frontend/generated/com/example/application/Contact';
 import { useEffect, useState } from 'react';
 import { FormikErrors, useFormik } from 'formik';
-import { TodoEndpoint } from 'Frontend/generated/endpoints';
-import { EndpointValidationError } from '@hilla/frontend';
+import { EventEndpoint, TodoEndpoint } from 'Frontend/generated/endpoints';
+import { EndpointValidationError, Subscription } from '@hilla/frontend';
 import { FormLayout } from '@hilla/react-components/FormLayout.js';
 import { ComboBox } from '@hilla/react-components/ComboBox.js';
 import { TextField } from '@hilla/react-components/TextField.js';
@@ -13,10 +13,15 @@ import { DatePicker } from '@hilla/react-components/DatePicker.js';
 import { Tooltip } from '@hilla/react-components/Tooltip.js';
 import { TodoGrid } from './TodoGrid';
 import { ContactDialog } from './ContactDialog';
+import { Notification } from '@hilla/react-components/Notification.js';
+import Message from 'Frontend/generated/com/example/application/EventService/Message';
 
 export default function TodoView(): JSX.Element {
   const empty: Todo = { task: '', done: false };
   const [dialogOpened, setDialogOpened] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
+  const [savedMessage, setSavedMessage] = useState<Message>();
+  const [subscription, setSubscription] = useState<Subscription<Message>>();
   const [assigned, setAssigned] = useState<Contact>();
   const [todos, setTodos] = useState(Array<Todo>());
   const presets = ['Make food', 'Clean the house', 'Do the groceries', 'Mow the lawn', 'Walk the dog'];
@@ -54,9 +59,19 @@ export default function TodoView(): JSX.Element {
   useEffect(() => {
     (async () => {
       setTodos(await TodoEndpoint.findAll());
+      if (!subscription) {
+        setSubscription(
+          EventEndpoint.getEventsCancellable().onNext((event) => {
+            setSavedMessage(event);
+            setShowSaved(true);
+            setTimeout(() => setShowSaved(false), 2000);
+          })
+        );
+      }
     })();
-
-    return () => {};
+    return () => {
+      subscription?.cancel();
+    };
   }, []);
 
   // Update status of the Todo, this function is passed down to TodiItem via TodoGrid
@@ -153,6 +168,7 @@ export default function TodoView(): JSX.Element {
         </FormLayout>
         <ContactDialog opened={dialogOpened} onAssignContact={assignTodo}></ContactDialog>
         <FormButtons></FormButtons>
+        <Notification opened={showSaved}>{savedMessage?.data}</Notification>
       </div>
       <div className="m-m shadow-s p-s">
         <TodoGrid todos={todos} onChangeStatus={(todo, value) => changeStatus(todo, value)}></TodoGrid>

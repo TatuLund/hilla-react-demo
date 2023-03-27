@@ -15,11 +15,15 @@ public class ContactService {
     }
 
     public Page<Contact> getPage(int page, int pageSize, String filter) {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+        }
         var dbPage = contactRepository.findAllByEmailContainsIgnoreCase(filter, PageRequest.of(page, pageSize));
         return dbPage;
     }
 
-    public long getCount() { 
+    public long getCount() {
         return contactRepository.count();
     }
 
