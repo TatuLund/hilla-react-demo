@@ -32,7 +32,10 @@ public class TodoEndpoint {
 
   public Todo save(Todo todo) {
     Todo result = repository.save(todo);
-    return result;
+    Message message = new Message();
+    message.data = "Todo: "+todo.getId()+"/"+todo.getTask()+" saved!";
+    logger.info(message.data);
+    eventService.send(message);    return result;
   }
 
   public void remove(List<Todo> todos) {

@@ -19,8 +19,6 @@ import Message from 'Frontend/generated/com/example/application/EventService/Mes
 export default function TodoView(): JSX.Element {
   const empty: Todo = { task: '', done: false };
   const [dialogOpened, setDialogOpened] = useState(false);
-  const [showSaved, setShowSaved] = useState(false);
-  const [savedMessage, setSavedMessage] = useState<Message>();
   const [subscription, setSubscription] = useState<Subscription<Message>>();
   const [assigned, setAssigned] = useState<Contact>();
   const [todos, setTodos] = useState(Array<Todo>());
@@ -62,9 +60,7 @@ export default function TodoView(): JSX.Element {
       if (!subscription) {
         setSubscription(
           EventEndpoint.getEventsCancellable().onNext((event) => {
-            setSavedMessage(event);
-            setShowSaved(true);
-            setTimeout(() => setShowSaved(false), 2000);
+            Notification.show(event.data);
           })
         );
       }
@@ -74,7 +70,7 @@ export default function TodoView(): JSX.Element {
     };
   }, []);
 
-  // Update status of the Todo, this function is passed down to TodiItem via TodoGrid
+  // Update status of the Todo, this function is passed down to TodoItem via TodoGrid
   async function changeStatus(todo: Todo, done: boolean | undefined): Promise<void> {
     const isDone = done ? done : false;
     const newTodo = { ...todo, done: isDone };
@@ -168,7 +164,6 @@ export default function TodoView(): JSX.Element {
         </FormLayout>
         <ContactDialog opened={dialogOpened} onAssignContact={assignTodo}></ContactDialog>
         <FormButtons></FormButtons>
-        <Notification opened={showSaved}>{savedMessage?.data}</Notification>
       </div>
       <div className="m-m shadow-s p-s">
         <TodoGrid todos={todos} onChangeStatus={(todo, value) => changeStatus(todo, value)}></TodoGrid>
