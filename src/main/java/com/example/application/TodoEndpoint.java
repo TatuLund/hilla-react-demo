@@ -35,7 +35,8 @@ public class TodoEndpoint {
     Message message = new Message();
     message.data = "Todo: "+todo.getId()+"/"+todo.getTask()+" saved!";
     logger.info(message.data);
-    eventService.send(message);    return result;
+    eventService.send(message);
+    return result;
   }
 
   public void remove(List<Todo> todos) {

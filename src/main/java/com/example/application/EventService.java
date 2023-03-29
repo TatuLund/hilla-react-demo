@@ -27,7 +27,6 @@ public class EventService {
         bus = event.asFlux().replay(1).autoConnect();
     }
 
-    @AnonymousAllowed
     public @Nonnull Flux<Message> join() {
         return bus;
     }

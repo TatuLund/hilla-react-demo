@@ -21,7 +21,7 @@ public class ContactEndpoint {
     
     Logger logger = LoggerFactory.getLogger(ContactEndpoint.class);
 
-    class PageResponse {
+    static class PageResponse {
         @Nonnull
         public List<@Nonnull Contact> content;
         @Nonnull
