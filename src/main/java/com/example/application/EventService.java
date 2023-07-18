@@ -1,14 +1,11 @@
 package com.example.application;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.springframework.stereotype.Service;
-
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import dev.hilla.Nonnull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Sinks.EmitFailureHandler;
 import reactor.core.publisher.Sinks.EmitResult;
 import reactor.core.publisher.Sinks.Many;
 
@@ -32,6 +29,11 @@ public class EventService {
     }
 
     public void send(Message message) {
-        event.emitNext(message, (signalType, emitResult) -> emitResult == EmitResult.FAIL_NON_SERIALIZED);
+        event.emitNext(message, emitFailureHandler());
+    }
+
+    private EmitFailureHandler emitFailureHandler() {
+        return (signalType,
+                emitResult) -> emitResult == EmitResult.FAIL_NON_SERIALIZED;
     }
 }

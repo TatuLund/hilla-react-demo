@@ -14,7 +14,7 @@ type MenuRoute = ViewRouteObject &
     handle: Required<MenuProps>;
   }>;
 
-export default function MenuOnLeftLayout(): JSX.Element {
+export default function MenuOnLeftLayout() : JSX.Element {
   const matches = useViewMatches();
 
   const currentTitle = matches[matches.length - 1]?.handle?.title ?? 'Unknown';
@@ -24,40 +24,40 @@ export default function MenuOnLeftLayout(): JSX.Element {
   ) as readonly MenuRoute[];
 
   return (
-    <>
-      <AppLayout className="block h-full" primarySection="drawer">
-        <header slot="drawer">
-          <h1 className="text-l m-0">My App</h1>
-        </header>
-        <Scroller slot="drawer" scroll-direction="vertical">
-          <nav>
-            {menuRoutes.map(({ path, handle: { icon, title } }) => (
-              <NavLink
-                className={({ isActive }) => `${css.navlink} ${isActive ? css.navlink_active : ''}`}
-                key={path}
-                to={path}
-              >
-                {({ isActive }) => (
-                  <Item key={path} selected={isActive}>
-                    <span className={`${icon} ${css.navicon}`} aria-hidden="true"></span>
-                    {title}
-                  </Item>
-                )}
-              </NavLink>
-            ))}
-          </nav>
-        </Scroller>
-        <footer slot="drawer" />
+	  <>
+    <AppLayout className="block h-full" primarySection="drawer">
+      <header slot="drawer">
+        <h1 className="text-l m-0">My App</h1>
+      </header>
+      <Scroller slot="drawer" scroll-direction="vertical">
+        <nav>
+          {menuRoutes.map(({ path, handle: { icon, title } }) => (
+            <NavLink
+              className={({ isActive }) => `${css.navlink} ${isActive ? css.navlink_active : ''}`}
+              key={path}
+              to={path}
+            >
+              {({ isActive }) => (
+                <Item key={path} selected={isActive}>
+                  <span className={`${icon} ${css.navicon}`} aria-hidden="true"></span>
+                  {title}
+                </Item>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+      </Scroller>
+      <footer slot="drawer" />
 
-        <DrawerToggle slot="navbar" aria-label="Menu toggle"></DrawerToggle>
-        <h2 slot="navbar" className="text-l m-0">
-          {currentTitle}
-        </h2>
+      <DrawerToggle slot="navbar" aria-label="Menu toggle"></DrawerToggle>
+      <h2 slot="navbar" className="text-l m-0">
+        {currentTitle}
+      </h2>
 
-        <Suspense fallback={<Placeholder />}>
-          <Outlet />
-        </Suspense>
-      </AppLayout>
+      <Suspense fallback={<Placeholder />}>
+        <Outlet />
+      </Suspense>
+    </AppLayout>
     </>
   );
 }
