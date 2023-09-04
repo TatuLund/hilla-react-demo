@@ -5,11 +5,12 @@ import { FormikErrors, useFormik } from 'formik';
 import { EventEndpoint, TodoEndpoint } from 'Frontend/generated/endpoints';
 import { EndpointValidationError, Subscription } from '@hilla/frontend';
 import { FormLayout } from '@hilla/react-components/FormLayout.js';
+import { Icon } from '@hilla/react-components/Icon.js';
 import { ComboBox } from '@hilla/react-components/ComboBox.js';
 import { TextField } from '@hilla/react-components/TextField.js';
 import { IntegerField } from '@hilla/react-components/IntegerField.js';
 import { Button } from '@hilla/react-components/Button.js';
-import { DatePicker } from '@hilla/react-components/DatePicker.js';
+import { DatePicker, DatePickerDate, DatePickerI18n } from '@hilla/react-components/DatePicker.js';
 import { Tooltip } from '@hilla/react-components/Tooltip.js';
 import { TodoGrid } from './TodoGrid';
 import { ContactDialog } from './ContactDialog';
@@ -22,7 +23,18 @@ export default function TodoView(): JSX.Element {
   const [subscription, setSubscription] = useState<Subscription<Message>>();
   const [assigned, setAssigned] = useState<Contact>();
   const [todos, setTodos] = useState(Array<Todo>());
+  const [adding, setAdding] = useState(true);
   const presets = ['Make food', 'Clean the house', 'Do the groceries', 'Mow the lawn', 'Walk the dog'];
+
+  function edit(todo: Todo) {
+    setAdding(false);
+    formik.setValues(todo);
+  }
+
+  function addNew(todo: Todo) {
+    setAdding(true);
+    formik.setValues(empty);
+  }
 
   // Attempt saving of the new Todo item to backend,
   // if there are validation errors, backend will throw and exception
@@ -32,7 +44,11 @@ export default function TodoView(): JSX.Element {
     onSubmit: async (value: Todo, { setSubmitting, setErrors }) => {
       try {
         const saved = (await TodoEndpoint.save(value)) ?? value;
-        setTodos([...todos, saved]);
+        if (adding) {
+          setTodos([...todos, saved]);
+        } else {
+          setTodos(todos.map((item) => (item.id === saved.id ? saved : item)));
+        }
         formik.resetForm();
         setAssigned(undefined);
       } catch (e: unknown) {
@@ -107,8 +123,14 @@ export default function TodoView(): JSX.Element {
           <Button onClick={() => setDialogOpened(!dialogOpened)}>
             {assigned ? assigned.firstName + ' ' + assigned.lastName : 'Assign'}
           </Button>
-          <Button className="ml-auto" theme="primary" disabled={formik.isSubmitting} onClick={formik.submitForm}>
-            Add
+          <Button
+            id="add"
+            className="ml-auto"
+            theme="primary"
+            disabled={formik.isSubmitting}
+            onClick={formik.submitForm}
+          >
+            {adding ? 'Add' : 'Update'}
           </Button>
         </div>
       </>
@@ -121,6 +143,9 @@ export default function TodoView(): JSX.Element {
   return (
     <>
       <div className="grid gap-m shadow-s m-m p-s">
+        <Button style={{ width: '40px' }} id="new" theme="tertiary icon" onClick={() => addNew(empty)}>
+          <Icon icon="vaadin:plus" />
+        </Button>
         <FormLayout>
           <ComboBox
             label="Task"
@@ -166,7 +191,7 @@ export default function TodoView(): JSX.Element {
         <FormButtons></FormButtons>
       </div>
       <div className="m-m shadow-s p-s">
-        <TodoGrid todos={todos} onChangeStatus={(todo, value) => changeStatus(todo, value)}></TodoGrid>
+        <TodoGrid todos={todos} onEdit={edit} onChangeStatus={(todo, value) => changeStatus(todo, value)}></TodoGrid>
         <Button theme="error" className="mt-m" disabled={noDone()} onClick={remove}>
           Remove<Tooltip position="end-bottom" slot="tooltip" text="Remove todos that are done"></Tooltip>
         </Button>
